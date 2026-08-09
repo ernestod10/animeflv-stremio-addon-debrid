@@ -1,5 +1,5 @@
 const ANIMEFLV_API_BASE = "https://animeflv.ahmedrangel.com/api"
-const ANIMEFLV_BASE = "https://www3.animeflv.net"
+const ANIMEFLV_BASE = "https://www4.animeflv.net"
 
 const fsPromises = require("fs/promises");
 const cheerio = require("cheerio");
