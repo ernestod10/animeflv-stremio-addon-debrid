@@ -68,7 +68,7 @@ function HandleStreamRequest(req, res, next) {
       } else {
         if (!res.headersSent) {
           res.header('Cache-Control', "max-age=86400, stale-while-revalidate=86400, stale-if-error=259200")
-          res.json({ streams, message: "Failed getting Anime info" });
+          res.json({ streams, message: "Failed getting streams" });
           next()
         }
       }
@@ -138,7 +138,8 @@ function HandleStreamRequest(req, res, next) {
         return animeFLVAPI.GetItemStreams(result.slug, onlyInternal, episode)
       })
       const animeAV1p = animeAV1API.SearchAnimeAV1(searchTerm, req.params.type).then((animeFLVitem) => {
-        const result = fuzzysort.go(searchTerm, animeFLVitem, {key: 'title', limit: 1})[0]?.obj || animeFLVitem[0];
+        const result = fuzzysort.go(searchTerm, animeFLVitem, {key: 'title', limit: 1, threshold: .5})[0]?.obj;
+        if (!result) throw Error('No search results!')
         console.log('\x1b[36mGot AnimeAV1 entry:\x1b[39m', result.title)
         return animeAV1API.GetItemStreams(result.slug, onlyInternal, episode)
       })
@@ -158,7 +159,8 @@ function HandleStreamRequest(req, res, next) {
         return animejaraAPI.GetItemStreams(result.slug, onlyInternal, season, episode)
       })
       const jkanimep = jkanimeAPI.SearchJKAnime(searchTerm).then((animeFLVitem) => {
-        const result = fuzzysort.go(searchTerm, animeFLVitem, {key: 'title', limit: 1})[0]?.obj || animeFLVitem[0];
+        const result = fuzzysort.go(searchTerm, animeFLVitem, {key: 'title', limit: 1, threshold: .5})[0]?.obj;
+        if (!result) throw Error('No search results!')
         console.log('\x1b[36mGot JKAnime entry:\x1b[39m', result.title)
         return jkanimeAPI.GetItemStreams(result.slug, onlyInternal, episode)
       })
@@ -171,7 +173,7 @@ function HandleStreamRequest(req, res, next) {
         } else {
           if (!res.headersSent) {
             res.header('Cache-Control', "max-age=86400, stale-while-revalidate=86400, stale-if-error=259200")
-            res.json({ streams, message: "Failed getting Anime info" });
+            res.json({ streams, message: "Failed getting streams" });
             next()
           }
         }
