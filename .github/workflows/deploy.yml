@@ -4,7 +4,7 @@ on:
     - 'README.md'
     - 'LICENSE'
     - 'vercel.json'
-    - '.gitatributes'
+    - '.gitattributes'
     - '.gitignore'
     - '.github/**'
     branches:
@@ -17,16 +17,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repo
-      uses: actions/checkout@v6
+      uses: actions/checkout@v6.1.0
     - name: Set up Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v7.0.0
       with:
         node-version: ${{ vars.NODE_VERSION }}
         cache: 'npm'
     - name: npm install (npm ci)
       run: npm ci
     - name: Upload artifact for deployment job
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7.0.1
       with:
         name: node-app
         path: .
@@ -37,12 +37,12 @@ jobs:
     needs: build
     steps:
     - name: Download artifact from build job
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8.0.1
       with:
         name: node-app
     - name: SFTP upload
       #uses: wlixcc/SFTP-Deploy-Action@v1.2.6
-      uses: Dylan700/sftp-upload-action@latest
+      uses: Dylan700/sftp-upload-action@v1.2.4
       with:
         username: ${{ vars.USERNAME }}
         server: ${{ vars.SSHSERVER }}
@@ -57,11 +57,11 @@ jobs:
           README.md
           LICENSE
           vercel.json
-          .gitatributes
+          .gitattributes
           .gitignore
           .github
     - name: Restart app
-      uses: satak/webrequest-action@master
+      uses: Satak/webrequest-action@v1.5.0
       with:
         url: https://api.alwaysdata.com/v1/site/970871/restart/
         method: POST
