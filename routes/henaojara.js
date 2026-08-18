@@ -150,7 +150,8 @@ async function GetEpisodeLinks(slug, epNumber = 1) {
     const $ = cheerio.load(await episodeData());
 
     const episodeLinks = {
-      title: $("#l > div > h1").text(),
+      title: $("#l > div > h1").text().replace(/episodio \d+$/i, "").trim(),
+      number: Number($("#l > div > h1").text().match(/episodio (\d+)/)?.[1]),
       servers: []
     }
 

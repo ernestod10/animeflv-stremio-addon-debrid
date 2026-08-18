@@ -152,8 +152,12 @@ async function GetEpisodeLinks(slug, season = undefined, epNumber = undefined) {
 
     const $ = cheerio.load(await episodeData());
 
+    let optSeason = $("#content div.episodio-info > div.episodio-meta").text().match(/Temporada \d+/)?.[0]
+    if (optSeason === "Temporada 1") optSeason = ""
+    else optSeason = " " + optSeason
+
     const episodeLinks = {
-      title: $("div.anime-info > h1").text() || $("div.episodio-detalle-header > h1.episodio-title").text(),
+      title: ($("div.anime-info > h1").text() || $("div.episodio-detalle-header > h1.episodio-title").text()) + optSeason,
       number: Number($("#content div.episodio-info > div.episodio-meta").text().match(/Episodio (\d+)/)?.[1]),
       servers: []
     }

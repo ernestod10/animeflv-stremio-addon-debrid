@@ -160,7 +160,7 @@ async function GetEpisodeLinks(slug, epNumber = 1) {
 
     const episodeLinks = {
       title: $("body > div > div.container > main > article > div > div > header > div > div > a").text(),
-      number: (["Película", "Especial"].includes($("body > div > div.container > main > article > div > div > header > div.flex > span").first().text().trim())) ? undefined : Number($("body > div > div.container > main > article > div > div > header > div.flex + h1").text().replace("Episodio ", "")) || epNumber,
+      number: (["Película", "Especial"].includes($("body > div > div.container > main > article > div > div > header > div.flex > span").first().text().trim())) ? undefined : Number($("main h1").text().replace("Episodio ", "")),
       servers: []
     }
 
@@ -193,7 +193,8 @@ async function GetEpisodeLinks(slug, epNumber = 1) {
         return {
           title: s.match(/server:\s?"(.*?)"/)?.[1],
           code: s.match(/url:\s?"(.*?)"/)?.[1],
-          dub: true
+          dub: true,
+          dubLang: "lat"
         }
       }));
     }
@@ -202,7 +203,8 @@ async function GetEpisodeLinks(slug, epNumber = 1) {
         return {
           title: s.match(/server:\s?"(.*?)"/)?.[1],
           url: s.match(/url:\s?"(.*?)"/)?.[1],
-          dub: true
+          dub: true,
+          dubLang: "lat"
         }
       }));
     }
@@ -212,7 +214,8 @@ async function GetEpisodeLinks(slug, epNumber = 1) {
         name: s?.title,
         download: s?.url?.replace("mega.nz/#!", "mega.nz/file/"),
         embed: s?.code?.replace("mega.nz/embed#!", "mega.nz/embed/"),
-        dub: s?.dub || false
+        dub: s?.dub || false,
+        dubLang: s?.dubLang
       });
     }
     /*

@@ -161,8 +161,8 @@ async function GetEpisodeLinks(slug, epNumber = undefined) {
     const $ = cheerio.load(await episodeData());
 
     const episodeLinks = {
-      title: $("div.video_i > a").text().trim(), //remove ep. number if present
-      number: epNumber,// || $("#jkanime > div > div > aside > h1").text().match(/\d+$/)?.[0],
+      title: $("div.video_i > a").first().text().trim(), //remove ep. number if present
+      number: Number($("div.page-content div.langopcs h1").text().match(/episodio (\d+)/i)?.[1]),
       servers: []
     }
 
@@ -172,11 +172,14 @@ async function GetEpisodeLinks(slug, epNumber = undefined) {
     if (serversObj) {
       const servers = JSON.parse(serversObj);
       for (const s of servers) {
+        dubLang = undefined
+        if (s?.lang === 3) dubLang = "lat"
         episodeLinks.servers.push({
           name: streamParser.getServerTitle(s?.server),
           //download: s?.[1]?.replace("mega.nz/#!", "mega.nz/file/"),
           embed: atob(s?.remote)?.replace("mega.nz/embed#!", "mega.nz/embed/").trim(),
-          dub: s?.lang !== 1
+          dub: s?.lang !== 1,
+          dubLang
         });
       }
     }
