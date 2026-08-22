@@ -233,7 +233,7 @@ function CombineStreams(animeFLVPromise, animeAV1Promise, henaojaraPromise, tioa
     if (results[0].value) {
       console.log(`\x1b[36mGot ${results[0].value.length} AnimeFLV streams\x1b[39m`)
       combinedStreams = combinedStreams.concat(results[0].value)
-    } else {console.error('\x1b[31mFailed on AnimeFLV slug search because:\x1b[39m ' + results[0].reason)}
+    } else {console.error('\x1b[31mFailed on AnimeFLV stream search because:\x1b[39m ' + results[0].reason)}
     if (results[1].value) {
       console.log(`\x1b[36mGot ${results[1].value.length} AnimeAV1 streams\x1b[39m`)
       lastInternalFLV = combinedStreams.findLastIndex((stream)=>stream.url !== undefined)
@@ -291,7 +291,7 @@ function CombineStreams(animeFLVPromise, animeAV1Promise, henaojaraPromise, tioa
       lastInternal = combinedStreams.findLastIndex((stream)=>stream.url !== undefined)
       lastInternalJK = results[5].value.findLastIndex((stream)=>stream.url !== undefined)
       if (lastInternalJK === -1) {
-        combinedStreams = combinedStreams.concat(results[4].value) //JKAnime has only external links, just append at the end
+        combinedStreams = combinedStreams.concat(results[5].value) //JKAnime has only external links, just append at the end
       } else if ((lastInternalJK !== -1) && (lastInternal === -1)) {
         combinedStreams = results[5].value.concat(combinedStreams) //Previous has only external links, prepend at the start
       } else {
