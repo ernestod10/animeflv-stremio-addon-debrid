@@ -86,7 +86,7 @@ You can add some configuration before the call. Right now, the only available co
 > ```
 5. Make requests to the app on localhost:3000 (or the port set in an environment variable if it exists) or by using Stremio, in which case you'll need to install the addon (just provide Stremio the manifest url: "https://localhost:3000/manifest.json", for example)
 > [!TIP]
-> When running locally, your IP and the server's IP are the same, so you can uncomment [the code on `animeFLV.js`](routes/animeFLV.js#L194) that extracts StreamTape links and they should work inside of Stremio (see [TO DO](#to-do)).
+> When running locally, your IP and the server's IP are the same, so you can uncomment [the code on `streamParsing.js`](lib/streamParsing.js#L30) that extracts StreamTape, Streamwish, Okru & Mixdrop links and they should work inside of Stremio (see [TO DO](#to-do)).
 
 ## Acknowledgements:
 > [!NOTE]
@@ -119,7 +119,7 @@ You can add some configuration before the call. Right now, the only available co
 ## TO DO:
 - [X] Publish to Stremio Addon Catalog (not on Beam Up, because the beamup tool is not working for me)
 - [X] Implement Stremio's `skip` extra argument functionality for pagination (each query outputs 24 results)
-- [ ] Research how to get the files directly to Stremio instead of having to send an external link (Streamtape streams are IP bound 😞)
+- [ ] Research how to get the files directly to Stremio instead of having to send an external link (Streamtape, Streamwish, Okru & Mixdrop streams are IP bound 😞)
   - [X] Got YourUpload streams working inside of Stremio
   - [X] Got MP4Upload streams working inside of Stremio
 
