@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const realdebrid = require("../lib/realdebrid.js");
+const debrid = require("../lib/debrid.js");
 
 function decodeTargetUrl(param) {
   if (!param) return null;
@@ -23,9 +23,10 @@ function decodeTargetUrl(param) {
   return param;
 }
 
-async function handleResolve(apiKey, rawUrl, res) {
+async function handleResolve(provider, apiKey, rawUrl, res) {
+  const provInfo = debrid.getProviderInfo(provider);
   if (!apiKey) {
-    return res.status(400).send("Real-Debrid API key is required");
+    return res.status(400).send(`${provInfo.name} API key is required`);
   }
   const targetUrl = decodeTargetUrl(rawUrl);
   if (!targetUrl) {
@@ -33,24 +34,34 @@ async function handleResolve(apiKey, rawUrl, res) {
   }
 
   try {
-    const rdData = await realdebrid.unrestrictLink(apiKey, targetUrl);
-    console.log(`\x1b[32m[Real-Debrid] Redirecting to stream:\x1b[39m ${rdData.download}`);
-    // 302 Redirect directly to Real-Debrid CDN
-    return res.redirect(302, rdData.download);
+    const data = await debrid.unrestrictLink(provInfo.id, apiKey, targetUrl);
+    console.log(`\x1b[32m[${provInfo.name}] Redirecting to stream:\x1b[39m ${data.download}`);
+    // 302 Redirect directly to Debrid CDN
+    return res.redirect(302, data.download);
   } catch (err) {
-    console.error(`\x1b[31m[Real-Debrid] Resolution error:\x1b[39m ${err.message}`);
-    return res.status(502).send(`Real-Debrid resolution error: ${err.message}`);
+    console.error(`\x1b[31m[${provInfo.name}] Resolution error:\x1b[39m ${err.message}`);
+    return res.status(502).send(`${provInfo.name} resolution error: ${err.message}`);
   }
 }
 
-// Route with path parameters (using base64url encoded target URL)
-router.get("/rd/resolve/:apiKey/:encodedUrl", (req, res) => {
-  return handleResolve(req.params.apiKey, req.params.encodedUrl, res);
+// Multi-debrid routes
+router.get("/debrid/resolve/:provider/:apiKey/:encodedUrl", (req, res) => {
+  return handleResolve(req.params.provider, req.params.apiKey, req.params.encodedUrl, res);
 });
 
-// Route with query parameters
+router.get("/debrid/resolve", (req, res) => {
+  const provider = req.query.provider || "rd";
+  const apiKey = req.query.key || req.query.token;
+  return handleResolve(provider, apiKey, req.query.url, res);
+});
+
+// Backward-compatible Real-Debrid routes
+router.get("/rd/resolve/:apiKey/:encodedUrl", (req, res) => {
+  return handleResolve("rd", req.params.apiKey, req.params.encodedUrl, res);
+});
+
 router.get("/rd/resolve", (req, res) => {
-  return handleResolve(req.query.key || req.query.token, req.query.url, res);
+  return handleResolve("rd", req.query.key || req.query.token, req.query.url, res);
 });
 
 module.exports = router;

@@ -41,18 +41,22 @@ function HandleLongStreamRequest(req, res, next) {
 function HandleStreamRequest(req, res, next) {
   console.log(`\x1b[96mEntered HandleStreamRequest with\x1b[39m ${req.originalUrl}`)
   const onlyInternal = (res.locals.config?.get("externalStreams") != 'true')
-  const rdKey = res.locals.config?.get("rdKey") || res.locals.config?.get("realdebrid") || undefined
-  const rdOnly = (res.locals.config?.get("rdOnly") === 'true')
+  const debridProvider = res.locals.config?.get("debridProvider") || "rd"
+  const debridKey = res.locals.config?.get("debridKey") || res.locals.config?.get("rdKey") || res.locals.config?.get("realdebrid") || undefined
+  const debridOnly = (res.locals.config?.get("debridOnly") === 'true' || res.locals.config?.get("rdOnly") === 'true')
   const baseUrl = `${req.protocol}://${req.get('host')}`
   const streamOptions = {
     onlyInternal,
-    rdKey,
-    rdOnly,
+    debridProvider,
+    debridKey,
+    debridOnly,
+    rdKey: debridKey,
+    rdOnly: debridOnly,
     baseUrl
   }
 
   // 1. Check Stream Cache
-  const cacheKey = `${req.params.type}:${req.params.videoId}:${rdKey || 'nord'}:${onlyInternal}:${rdOnly}`
+  const cacheKey = `${req.params.type}:${req.params.videoId}:${debridProvider}:${debridKey || 'nodebrid'}:${onlyInternal}:${debridOnly}`
   const cachedStreams = cache.getStreamCache(cacheKey)
   if (cachedStreams && cachedStreams.length > 0) {
     console.log(`\x1b[32m[Cache Hit] Returning ${cachedStreams.length} cached streams for ${req.params.videoId}\x1b[39m`)
@@ -390,9 +394,10 @@ function CombineStreams(animeFLVPromise, animeAV1Promise, henaojaraPromise, tioa
     } else {
       console.error('\x1b[31mFailed on JKAnime slug search because:\x1b[39m ' + results[5].reason);
     }
-    const rdStreams = combinedStreams.filter((s) => s.name?.includes("[RD+]"));
-    const otherStreams = combinedStreams.filter((s) => !s.name?.includes("[RD+]"));
-    return rdStreams.concat(otherStreams);
+    const isDebrid = (s) => s.name && s.name.startsWith("[") && s.name.includes("+]");
+    const debridStreams = combinedStreams.filter(isDebrid);
+    const otherStreams = combinedStreams.filter((s) => !isDebrid(s));
+    return debridStreams.concat(otherStreams);
   })
 }
 
