@@ -12,12 +12,15 @@ function setCORS(_req, res, next) {
 }
 app.use(setCORS);
 
-app.use(express.static('public'))
+const path = require("path");
+
+app.use(express.static(path.join(__dirname, 'public')))
+app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 const fsPromises = require("fs/promises")
 function ReadManifest() {
-  return fsPromises.readFile('./package.json', 'utf8').then((data) => {
+  return fsPromises.readFile(path.join(__dirname, 'package.json'), 'utf8').then((data) => {
     const packageJSON = JSON.parse(data);
 
     let manifest = {
@@ -379,10 +382,14 @@ app.listen(process.env.PORT || 3000, () => {
   const tioanimeAPI = require('./routes/tioanime.js')
   const animejaraAPI = require('./routes/animejara.js')
   const jkanimeAPI = require('./routes/jkanime.js')
-  let imports = [animeFLVAPI, animeAV1API, tioanimeAPI, henaojaraAPI, animejaraAPI, jkanimeAPI]
-  imports.forEach((api) => {
-    api.UpdateAiringAnimeFile().then(() => {
-      setInterval(api.UpdateAiringAnimeFile.bind(api), 86400000); //Update every 24h
+  if (!process.env.VERCEL) {
+    let imports = [animeFLVAPI, animeAV1API, tioanimeAPI, henaojaraAPI, animejaraAPI, jkanimeAPI]
+    imports.forEach((api) => {
+      api.UpdateAiringAnimeFile().then(() => {
+        setInterval(api.UpdateAiringAnimeFile.bind(api), 86400000); //Update every 24h
+      }).catch(console.error)
     })
-  })
+  }
 });
+
+module.exports = app;
