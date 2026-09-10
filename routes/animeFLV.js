@@ -252,12 +252,12 @@ async function GetEpisodeLinks(slug, epNumber = 1) {
     const otherDownloads = $("body > div.Wrapper > div.Body > div > div > div > div > div > table > tbody > tr");
 
     for (const el of otherDownloads) {
-      const name = $(el).find("td").eq(0).text();
-      const lookFor = ["Zippyshare", "1Fichier"];
-      if (lookFor.includes(name)) {
+      const name = $(el).find("td").eq(0).text().trim();
+      const href = $(el).find("td:last-child a").attr("href");
+      if (name && href) {
         episodeLinks.servers.push({
-          name: $(el).find("td").eq(0).text(),
-          download: $(el).find("td:last-child a").attr("href")
+          name: name,
+          download: href
         });
       }
     }

@@ -169,27 +169,32 @@ async function GetEpisodeLinks(slug, epNumber = 1) {
     if (serversObj) {
       const servers = JSON.parse(serversObj);
       for (const s of servers) {
+        const directUrl = s?.[1]?.replace("mega.nz/embed#!", "mega.nz/file/").replace("mega.nz/embed/", "mega.nz/file/");
         episodeLinks.servers.push({
           name: s?.[0],
-          //download: s?.[1]?.replace("mega.nz/#!", "mega.nz/file/"),
-          embed: s?.[1]?.replace("mega.nz/embed#!", "mega.nz/embed/"),
+          download: directUrl,
+          embed: s?.[1]?.replace("mega.nz/file/", "mega.nz/embed/"),
           dub: false
         });
       }
     }
 
-    // const otherDownloads = $("body > div.Wrapper > div.Body > div > div > div > div > div > table > tbody > tr");
+    const otherDownloads = $("table.table-downloads tbody tr, table.table-downloads tr");
 
-    // for (const el of otherDownloads) {
-    //   const name = $(el).find("td").eq(0).text();
-    //   const lookFor = ["Zippyshare", "1Fichier"];
-    //   if (lookFor.includes(name)) {
-    //     episodeLinks.servers.push({
-    //       name: $(el).find("td").eq(0).text(),
-    //       download: $(el).find("td:last-child a").attr("href")
-    //     });
-    //   }
-    // }
+    for (const el of otherDownloads) {
+      const tds = $(el).find("td");
+      const name = tds.eq(0).text().trim();
+      const lang = tds.eq(1).text().trim().toLowerCase();
+      const href = $(el).find("a").attr("href");
+      if (name && href) {
+        episodeLinks.servers.push({
+          name: name,
+          download: href,
+          dub: lang.includes("latino") || lang.includes("castellano") || lang.includes("español"),
+          dubLang: lang.includes("latino") ? "lat" : (lang.includes("castellano") ? "es" : undefined)
+        });
+      }
+    }
     return episodeLinks;
   } catch (e) {
     console.error("Error on GetEpisodeLinks:", e);

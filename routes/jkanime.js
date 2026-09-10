@@ -172,12 +172,20 @@ async function GetEpisodeLinks(slug, epNumber = undefined) {
     if (serversObj) {
       const servers = JSON.parse(serversObj);
       for (const s of servers) {
-        dubLang = undefined
-        if (s?.lang === 3) dubLang = "lat"
+        let dubLang = undefined;
+        if (s?.lang === 3) dubLang = "lat";
+        let rawRemote = "";
+        try {
+          rawRemote = atob(s?.remote)?.trim();
+        } catch (e) {}
+        const serverTitle = streamParser.getServerTitle(s?.server);
+        const directUrl = rawRemote?.replace("mega.nz/embed#!", "mega.nz/file/").replace("mega.nz/embed/", "mega.nz/file/");
+        const embedUrl = rawRemote?.replace("mega.nz/file/", "mega.nz/embed/");
+
         episodeLinks.servers.push({
-          name: streamParser.getServerTitle(s?.server),
-          //download: s?.[1]?.replace("mega.nz/#!", "mega.nz/file/"),
-          embed: atob(s?.remote)?.replace("mega.nz/embed#!", "mega.nz/embed/").trim(),
+          name: serverTitle,
+          download: directUrl,
+          embed: embedUrl,
           dub: s?.lang !== 1,
           dubLang
         });

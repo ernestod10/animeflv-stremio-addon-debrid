@@ -350,6 +350,9 @@ app.get("/:config/configure", (req, res) => {
   })
 })
 
+const rd = require("./routes/rd");
+app.use(rd);
+
 const streams = require("./routes/streams");
 app.use(streams);
 

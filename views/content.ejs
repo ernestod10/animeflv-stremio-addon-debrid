@@ -12,6 +12,20 @@
       <label style="display:block"><img style="height:1.1em" src="https://cdn.jkdesa.com/assets3/css/img/jkanimenet-dark.png?v=2.0.184" alt="JKAnime"> <input style="vertical-align:top" type="checkbox" id="jkanime"<%= (config?.get("onAirCatalogs").includes("jkanime"))?` checked="true"`:"" %>></label>
     </div>
     </label>
+    <div style="margin-top:1.2em;margin-bottom:1.2em;padding:1em;border:1px solid rgba(255,255,255,0.15);border-radius:8px;background:rgba(0,0,0,0.25);">
+      <label class="label-to-top" style="font-weight:bold;font-size:1.05em;display:flex;align-items:center;gap:0.5em;">
+        ⚡ Integración con Real-Debrid
+      </label>
+      <div style="font-size:0.85em;color:#aaa;margin-bottom:0.8em;margin-top:0.3em;">
+        Reproduce enlaces de 1Fichier, Mega y otros hosters a máxima velocidad sin anuncios ni cuota de buffer.<br>
+        Consigue tu API Token en: <a href="https://real-debrid.com/apitoken" target="_blank" style="color:#00d2ff;text-decoration:underline;">real-debrid.com/apitoken</a>
+      </div>
+      <input type="text" class="form-element full-width" id="rdKey" placeholder="Pega aquí tu API Token de Real-Debrid" value="<%= (config?.get('rdKey')) || '' %>" style="padding:0.6em;text-align:center;box-sizing:border-box;">
+      <label class="label-to-top" style="display:block;margin-top:0.8em;font-size:0.9em;">
+        Mostrar únicamente streams de Real-Debrid <input type="checkbox" id="rdOnly"<%= (config?.get("rdOnly") === 'true') ? ` checked="true"` : "" %>>
+      </label>
+    </div>
+
     <label class="full-width label-to-top" style="display:block" for="manifest_url">Your manifest URL:</label>
     <textarea class="form-element" id="manifest_url" rows="1"
       style="resize:none;overflow:hidden;text-align:center;font-size:unset;"
@@ -29,16 +43,19 @@
   </a>
   <script>const ta=document.getElementById('manifest_url');const externalStreams=document.getElementById('externalStreams')
     const animeflv=document.getElementById('animeflv');const animeav1=document.getElementById('animeav1');const henaojara=document.getElementById('henaojara');const tioanime=document.getElementById('tioanime');const animejara=document.getElementById('animejara');const jkanime=document.getElementById('jkanime');
+    const rdKey=document.getElementById('rdKey');const rdOnly=document.getElementById('rdOnly');
     const providers=[animeflv,animeav1,henaojara,tioanime,animejara,jkanime]
     const installLink=document.getElementById('installLink')
     function genManifLink(){
       let config=new URLSearchParams();
       if(providers.some((e)=>e.checked)){config.append("onAirCatalogs",providers.filter(e=>e.checked).map(e=>e.id).join())}
       if(externalStreams.checked){config.append("externalStreams","true")}
+      if(rdKey.value.trim()){config.append("rdKey",rdKey.value.trim())}
+      if(rdOnly.checked){config.append("rdOnly","true")}
       ta.innerText=`${window.location.origin}${(config.size>0)?"/"+config.toString():""}/manifest.json`
       installLink.href=ta.value.replace('https://','stremio://').replace('http://','stremio://')
       ta.style.minHeight=ta.scrollHeight+"px"
     }
-    [externalStreams,...providers].forEach((e)=>e.addEventListener('input',()=>genManifLink()))
+    [externalStreams,...providers,rdKey,rdOnly].forEach((e)=>e.addEventListener('input',()=>genManifLink()))
     genManifLink()</script>
 </div>
