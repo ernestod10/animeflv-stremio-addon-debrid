@@ -14,6 +14,34 @@ const jkanimeAPI = require('./jkanime.js')
 const fuzzysort = require('fuzzysort')
 const cache = require("../lib/cache.js")
 
+const ALL_PROVIDERS = ['tioanime', 'jkanime', 'animeflv', 'animeav1', 'henaojara', 'animejara'];
+
+/**
+ * Executes a stream query with circuit breaker and timeout guards.
+ */
+function queryProvider(provName, enabledProviders, streamFn) {
+  if (!enabledProviders.includes(provName)) {
+    return Promise.resolve([])
+  }
+  if (!cache.isProviderAvailable(provName)) {
+    console.log(`\x1b[33m[Circuit Breaker] Skipping ${provName} (in cooldown)\x1b[39m`)
+    return Promise.resolve([])
+  }
+  return cache.withTimeout(Promise.resolve().then(streamFn), 3500, provName)
+    .then((streams) => {
+      if (Array.isArray(streams) && streams.length > 0) {
+        cache.recordProviderSuccess(provName)
+        return streams
+      }
+      return []
+    })
+    .catch((err) => {
+      console.error(`\x1b[31m[${provName}] failed: ${err.message}\x1b[39m`)
+      cache.recordProviderFailure(provName)
+      return []
+    })
+}
+
 /**
  * Tipical express middleware callback.
  * @callback subRequestMiddleware
@@ -21,22 +49,14 @@ const cache = require("../lib/cache.js")
  * @param res - Our response
  * @param {function} [next] - The next middleware function in the chain, should end the response at some point
  */
-/** 
- * Handles requests to /stream that contain extra parameters, we should append them to the request for future middleware, see {@link SearchParamsRegex} to see how these are handled
- * @param req - Request sent to our router, containing all relevant info
- * @param res - Our response, we don't end it because this function/middleware doesn't handle the full request!
- * @param {subRequestMiddleware} next - REQUIRED: The next middleware function in the chain, should end the response at some point
- */
 function HandleLongStreamRequest(req, res, next) {
   console.log(`\x1b[96mEntered HandleLongStreamRequest with\x1b[39m ${req.originalUrl}`)
   res.locals.extraParams = SearchParamsRegex(req.params[0])
   next()
 }
+
 /** 
- * Handles requests to /stream whether they contain extra parameters (see {@link HandleLongSubRequest} for details on this) or just the type and videoID.
- * @param req - Request sent to our router, containing all relevant info
- * @param res - Our response, note we use next() just in case we need to add middleware, but the response is handled by sending an empty stream Object.
- * @param {subRequestMiddleware} [next] - The next middleware function in the chain, can be empty because we already responded with this middleware
+ * Handles requests to /stream whether they contain extra parameters or just the type and videoID.
  */
 function HandleStreamRequest(req, res, next) {
   console.log(`\x1b[96mEntered HandleStreamRequest with\x1b[39m ${req.originalUrl}`)
@@ -45,6 +65,12 @@ function HandleStreamRequest(req, res, next) {
   const debridKey = res.locals.config?.get("debridKey") || res.locals.config?.get("rdKey") || res.locals.config?.get("realdebrid") || undefined
   const debridOnly = (res.locals.config?.get("debridOnly") === 'true' || res.locals.config?.get("rdOnly") === 'true')
   const baseUrl = `${req.protocol}://${req.get('host')}`
+
+  const streamProvConfig = res.locals.config?.get("streamProviders")
+  const enabledProviders = streamProvConfig
+    ? streamProvConfig.split(',').map(s => s.trim().toLowerCase())
+    : ALL_PROVIDERS
+
   const streamOptions = {
     onlyInternal,
     debridProvider,
@@ -56,7 +82,7 @@ function HandleStreamRequest(req, res, next) {
   }
 
   // 1. Check Stream Cache
-  const cacheKey = `${req.params.type}:${req.params.videoId}:${debridProvider}:${debridKey || 'nodebrid'}:${onlyInternal}:${debridOnly}`
+  const cacheKey = `${req.params.type}:${req.params.videoId}:${debridProvider}:${debridKey || 'nodebrid'}:${onlyInternal}:${debridOnly}:${enabledProviders.sort().join(',')}`
   const cachedStreams = cache.getStreamCache(cacheKey)
   if (cachedStreams && cachedStreams.length > 0) {
     console.log(`\x1b[32m[Cache Hit] Returning ${cachedStreams.length} cached streams for ${req.params.videoId}\x1b[39m`)
@@ -67,10 +93,11 @@ function HandleStreamRequest(req, res, next) {
 
   let streams = []
   const idDetails = req.params.videoId.split(':')
-  const videoID = idDetails[0] //We only want the first part of the videoID, which is the IMDB ID, the rest would be the season and episode
-  if ((videoID?.startsWith("animeflv")) || (videoID?.startsWith("animeav1")) || (videoID?.startsWith("henaojara")) || (videoID?.startsWith("tioanime")) || (videoID?.startsWith("animejara")) || (videoID?.startsWith("jkanime"))) { //If we got an AnimeFLV or AnimeAV1 specific ID
-    const ID = idDetails[1] //We want the second part of the videoID
-    let episode = idDetails[2] //undefined if we don't get an episode number in the query, which is fine
+  const videoID = idDetails[0]
+
+  if ((videoID?.startsWith("animeflv")) || (videoID?.startsWith("animeav1")) || (videoID?.startsWith("henaojara")) || (videoID?.startsWith("tioanime")) || (videoID?.startsWith("animejara")) || (videoID?.startsWith("jkanime"))) {
+    const ID = idDetails[1]
+    let episode = idDetails[2]
     let season
     if(videoID?.startsWith("animejara")){
       season = idDetails[2]
@@ -78,13 +105,24 @@ function HandleStreamRequest(req, res, next) {
     }
     console.log(`\x1b[33mGot a ${req.params.type} with ${videoID} ID:\x1b[39m ${ID}`)
     console.log('Extra parameters:', res.locals.extraParams)
-    const animeFLVp = cache.withTimeout(animeFLVAPI.GetItemStreams(ID, streamOptions, episode), 3500, "AnimeFLV")
-    const animeAV1p = cache.withTimeout(animeAV1API.GetItemStreams(ID, streamOptions, episode), 3500, "AnimeAV1")
-    const henaojarap = cache.withTimeout(henaojaraAPI.GetItemStreams(ID, streamOptions, episode), 3500, "Henaojara")
-    const tioanimep = cache.withTimeout(tioanimeAPI.GetItemStreams(ID, streamOptions, episode), 3500, "TioAnime")
-    const animejarap = cache.withTimeout(animejaraAPI.GetItemStreams(ID, streamOptions, season, episode), 3500, "AnimeJara")
-    const jkanimep = cache.withTimeout(jkanimeAPI.GetItemStreams(ID, streamOptions, episode), 3500, "JKAnime")
-    CombineStreams(animeFLVp, animeAV1p, henaojarap, tioanimep, animejarap, jkanimep).then((combinedStreams)=>{
+
+    // Direct provider lookup matching the ID
+    let providerPromises = []
+    if (videoID.startsWith("tioanime")) {
+      providerPromises.push(queryProvider("tioanime", ALL_PROVIDERS, () => tioanimeAPI.GetItemStreams(ID, streamOptions, episode)))
+    } else if (videoID.startsWith("jkanime")) {
+      providerPromises.push(queryProvider("jkanime", ALL_PROVIDERS, () => jkanimeAPI.GetItemStreams(ID, streamOptions, episode)))
+    } else if (videoID.startsWith("animeflv")) {
+      providerPromises.push(queryProvider("animeflv", ALL_PROVIDERS, () => animeFLVAPI.GetItemStreams(ID, streamOptions, episode)))
+    } else if (videoID.startsWith("animeav1")) {
+      providerPromises.push(queryProvider("animeav1", ALL_PROVIDERS, () => animeAV1API.GetItemStreams(ID, streamOptions, episode)))
+    } else if (videoID.startsWith("henaojara")) {
+      providerPromises.push(queryProvider("henaojara", ALL_PROVIDERS, () => henaojaraAPI.GetItemStreams(ID, streamOptions, episode)))
+    } else if (videoID.startsWith("animejara")) {
+      providerPromises.push(queryProvider("animejara", ALL_PROVIDERS, () => animejaraAPI.GetItemStreams(ID, streamOptions, season, episode)))
+    }
+
+    CombineStreams(providerPromises).then((combinedStreams) => {
       if (combinedStreams.length > 0) {
         console.log(`\x1b[36mGot ${combinedStreams.length} streams\x1b[39m`)
         cache.setStreamCache(cacheKey, combinedStreams)
@@ -102,21 +140,21 @@ function HandleStreamRequest(req, res, next) {
   } else {
     let episode, season, animeIMDBIDPromise
 
-    if (videoID?.startsWith("tt")) { //If we got an IMDB ID/TMDB ID
-      const ID = videoID //We want the IMDB ID as is
-      season = idDetails[1] //undefined if we don't get a season number in the query, which is fine
-      episode = idDetails[2] //undefined if we don't get an episode number in the query, which is fine
+    if (videoID?.startsWith("tt")) {
+      const ID = videoID
+      season = idDetails[1]
+      episode = idDetails[2]
       console.log(`\x1b[33mGot a ${req.params.type} with IMDB ID:\x1b[39m ${ID}`)
       animeIMDBIDPromise = Promise.resolve(ID)
     } else if (videoID?.startsWith("tmdb")) {
-      const ID = idDetails[1] //We want the second part of the videoID, which is the kitsu ID
-      season = idDetails[2] //undefined if we don't get a season number in the query, which is fine
-      episode = idDetails[3] //undefined if we don't get an episode number in the query, which is fine
+      const ID = idDetails[1]
+      season = idDetails[2]
+      episode = idDetails[3]
       console.log(`\x1b[33mGot a ${req.params.type} with TMDB ID:\x1b[39m ${ID}`)
       animeIMDBIDPromise = Metadata.GetIMDBIDFromTMDBID(ID, req.params.type)
-    } else if (videoID.match(/^(?:kitsu|mal|anidb|anilist)$/)) { //If we got a kitsu, mal, anilist or anidb ID
-      const ID = idDetails[1] //We want the second part of the videoID, which is the kitsu ID
-      episode = idDetails[2] //undefined if we don't get an episode number in the query, which is fine
+    } else if (videoID.match(/^(?:kitsu|mal|anidb|anilist)$/)) {
+      const ID = idDetails[1]
+      episode = idDetails[2]
       console.log(`\x1b[33mGot a ${req.params.type} with ${videoID} ID:\x1b[39m ${ID}`)
       animeIMDBIDPromise = relationsAPI.GetIMDBIDFromANIMEID(videoID, ID)
     } else {
@@ -124,6 +162,7 @@ function HandleStreamRequest(req, res, next) {
         res.header('Cache-Control', "max-age=86400, stale-while-revalidate=86400, stale-if-error=259200")
         res.json({ streams, message: "Wrong ID format, check manifest for errors" }); next()
       }
+      return
     }
 
     console.log('Extra parameters:', res.locals.extraParams)
@@ -153,111 +192,113 @@ function HandleStreamRequest(req, res, next) {
         })
       }
       
-      return metaProm.catch((err) => { //only catches error from TMDB or Cinemeta API calls, which we want
+      return metaProm.catch((err) => {
         console.error('\x1b[31mFailed on metadata:\x1b[39m ' + err)
         if (!res.headersSent) {
           res.header('Cache-Control', "max-age=86400, stale-while-revalidate=86400, stale-if-error=259200")
           res.json({ streams, message: "Failed getting media info" })
           next()
         }
-        throw err //We throw the error so we can catch it later
+        throw err
       })
     }).then((metadata) => {
       const searchTerm = ((season) && (parseInt(season) !== 1) && (parseInt(season) !== 0)) ? `${metadata.title} ${season}` : metadata.title
       
-      const animeFLVp = cache.withTimeout(
-        (() => {
-          const cachedSlug = cache.getSlugCache("animeflv", searchTerm)
-          if (cachedSlug) {
-            console.log(`\x1b[32m[Cache Hit] AnimeFLV slug:\x1b[39m ${cachedSlug}`)
-            return animeFLVAPI.GetItemStreams(cachedSlug, streamOptions, episode)
-          }
-          return animeFLVAPI.SearchAnimeFLV(searchTerm).then((animeFLVitem) => {
-            const result = fuzzysort.go(searchTerm, animeFLVitem, {key: 'title', limit: 1})[0]?.obj || animeFLVitem.sort((a,b)=>(a.type === req.params.type && b.type !== req.params.type)?-1:0)[0]
-            if (result?.slug) cache.setSlugCache("animeflv", searchTerm, result.slug)
-            return animeFLVAPI.GetItemStreams(result.slug, streamOptions, episode)
-          })
-        })(), 3500, "AnimeFLV"
-      )
+      // 1. TioAnime
+      const tioanimep = queryProvider("tioanime", enabledProviders, () => {
+        const cachedSlug = cache.getSlugCache("tioanime", searchTerm)
+        if (cachedSlug) {
+          console.log(`\x1b[32m[Cache Hit] TioAnime slug:\x1b[39m ${cachedSlug}`)
+          return tioanimeAPI.GetItemStreams(cachedSlug, streamOptions, episode)
+        }
+        return tioanimeAPI.SearchTioAnime(searchTerm, req.params.type).then((animeItems) => {
+          if (!animeItems || animeItems.length === 0) return []
+          const result = fuzzysort.go(searchTerm, animeItems, {key: 'title', limit: 1})[0]?.obj || animeItems[0]
+          if (result?.slug) cache.setSlugCache("tioanime", searchTerm, result.slug)
+          return tioanimeAPI.GetItemStreams(result.slug, streamOptions, episode)
+        })
+      })
 
-      const animeAV1p = cache.withTimeout(
-        (() => {
-          const cachedSlug = cache.getSlugCache("animeav1", searchTerm)
-          if (cachedSlug) {
-            console.log(`\x1b[32m[Cache Hit] AnimeAV1 slug:\x1b[39m ${cachedSlug}`)
-            return animeAV1API.GetItemStreams(cachedSlug, streamOptions, episode)
-          }
-          return animeAV1API.SearchAnimeAV1(searchTerm, req.params.type).then((animeFLVitem) => {
-            const result = fuzzysort.go(searchTerm, animeFLVitem, {key: 'title', limit: 1, threshold: .5})[0]?.obj
-            if (!result?.slug) throw Error('No search results!')
-            cache.setSlugCache("animeav1", searchTerm, result.slug)
-            return animeAV1API.GetItemStreams(result.slug, streamOptions, episode)
-          })
-        })(), 3500, "AnimeAV1"
-      )
+      // 2. JKAnime
+      const jkanimep = queryProvider("jkanime", enabledProviders, () => {
+        const cachedSlug = cache.getSlugCache("jkanime", searchTerm)
+        if (cachedSlug) {
+          console.log(`\x1b[32m[Cache Hit] JKAnime slug:\x1b[39m ${cachedSlug}`)
+          return jkanimeAPI.GetItemStreams(cachedSlug, streamOptions, episode)
+        }
+        return jkanimeAPI.SearchJKAnime(searchTerm).then((animeItems) => {
+          if (!animeItems || animeItems.length === 0) return []
+          const result = fuzzysort.go(searchTerm, animeItems, {key: 'title', limit: 1})[0]?.obj || animeItems[0]
+          if (!result?.slug) return []
+          cache.setSlugCache("jkanime", searchTerm, result.slug)
+          return jkanimeAPI.GetItemStreams(result.slug, streamOptions, episode)
+        })
+      })
 
-      const henaojarap = cache.withTimeout(
-        (() => {
-          const cachedSlug = cache.getSlugCache("henaojara", searchTerm)
-          if (cachedSlug) {
-            console.log(`\x1b[32m[Cache Hit] Henaojara slug:\x1b[39m ${cachedSlug}`)
-            return henaojaraAPI.GetItemStreams(cachedSlug, streamOptions, episode)
-          }
-          return henaojaraAPI.SearchHenaojara(searchTerm).then((animeFLVitem) => {
-            const result = fuzzysort.go(searchTerm, animeFLVitem, {key: 'title', limit: 1})[0]?.obj || animeFLVitem.sort((a,b)=>(a.type === req.params.type && b.type !== req.params.type)?-1:0)[0]
-            if (result?.slug) cache.setSlugCache("henaojara", searchTerm, result.slug)
-            return henaojaraAPI.GetItemStreams(result.slug, streamOptions, episode)
-          })
-        })(), 3500, "Henaojara"
-      )
+      // 3. AnimeFLV
+      const animeFLVp = queryProvider("animeflv", enabledProviders, () => {
+        const cachedSlug = cache.getSlugCache("animeflv", searchTerm)
+        if (cachedSlug) {
+          console.log(`\x1b[32m[Cache Hit] AnimeFLV slug:\x1b[39m ${cachedSlug}`)
+          return animeFLVAPI.GetItemStreams(cachedSlug, streamOptions, episode)
+        }
+        return animeFLVAPI.SearchAnimeFLV(searchTerm).then((animeItems) => {
+          if (!animeItems || animeItems.length === 0) return []
+          const result = fuzzysort.go(searchTerm, animeItems, {key: 'title', limit: 1})[0]?.obj || animeItems[0]
+          if (result?.slug) cache.setSlugCache("animeflv", searchTerm, result.slug)
+          return animeFLVAPI.GetItemStreams(result.slug, streamOptions, episode)
+        })
+      })
 
-      const tioanimep = cache.withTimeout(
-        (() => {
-          const cachedSlug = cache.getSlugCache("tioanime", searchTerm)
-          if (cachedSlug) {
-            console.log(`\x1b[32m[Cache Hit] TioAnime slug:\x1b[39m ${cachedSlug}`)
-            return tioanimeAPI.GetItemStreams(cachedSlug, streamOptions, episode)
-          }
-          return tioanimeAPI.SearchTioAnime(searchTerm, req.params.type).then((animeFLVitem) => {
-            const result = fuzzysort.go(searchTerm, animeFLVitem, {key: 'title', limit: 1})[0]?.obj || animeFLVitem[0]
-            if (result?.slug) cache.setSlugCache("tioanime", searchTerm, result.slug)
-            return tioanimeAPI.GetItemStreams(result.slug, streamOptions, episode)
-          })
-        })(), 3500, "TioAnime"
-      )
+      // 4. AnimeAV1
+      const animeAV1p = queryProvider("animeav1", enabledProviders, () => {
+        const cachedSlug = cache.getSlugCache("animeav1", searchTerm)
+        if (cachedSlug) {
+          console.log(`\x1b[32m[Cache Hit] AnimeAV1 slug:\x1b[39m ${cachedSlug}`)
+          return animeAV1API.GetItemStreams(cachedSlug, streamOptions, episode)
+        }
+        return animeAV1API.SearchAnimeAV1(searchTerm, req.params.type).then((animeItems) => {
+          if (!animeItems || animeItems.length === 0) return []
+          const result = fuzzysort.go(searchTerm, animeItems, {key: 'title', limit: 1})[0]?.obj || animeItems[0]
+          if (!result?.slug) return []
+          cache.setSlugCache("animeav1", searchTerm, result.slug)
+          return animeAV1API.GetItemStreams(result.slug, streamOptions, episode)
+        })
+      })
 
-      const animejarap = cache.withTimeout(
-        (() => {
-          const cachedSlug = cache.getSlugCache("animejara", searchTerm)
-          if (cachedSlug) {
-            console.log(`\x1b[32m[Cache Hit] AnimeJara slug:\x1b[39m ${cachedSlug}`)
-            return animejaraAPI.GetItemStreams(cachedSlug, streamOptions, season, episode)
-          }
-          return animejaraAPI.SearchAnimeJara(searchTerm, req.params.type).then((animeFLVitem) => {
-            const result = fuzzysort.go(searchTerm, animeFLVitem, {key: 'title', limit: 1})[0]?.obj || animeFLVitem[0]
-            if (result?.slug) cache.setSlugCache("animejara", searchTerm, result.slug)
-            return animejaraAPI.GetItemStreams(result.slug, streamOptions, season, episode)
-          })
-        })(), 3500, "AnimeJara"
-      )
+      // 5. Henaojara
+      const henaojarap = queryProvider("henaojara", enabledProviders, () => {
+        const cachedSlug = cache.getSlugCache("henaojara", searchTerm)
+        if (cachedSlug) {
+          console.log(`\x1b[32m[Cache Hit] Henaojara slug:\x1b[39m ${cachedSlug}`)
+          return henaojaraAPI.GetItemStreams(cachedSlug, streamOptions, episode)
+        }
+        return henaojaraAPI.SearchHenaojara(searchTerm).then((animeItems) => {
+          if (!animeItems || animeItems.length === 0) return []
+          const result = fuzzysort.go(searchTerm, animeItems, {key: 'title', limit: 1})[0]?.obj || animeItems[0]
+          if (result?.slug) cache.setSlugCache("henaojara", searchTerm, result.slug)
+          return henaojaraAPI.GetItemStreams(result.slug, streamOptions, episode)
+        })
+      })
 
-      const jkanimep = cache.withTimeout(
-        (() => {
-          const cachedSlug = cache.getSlugCache("jkanime", searchTerm)
-          if (cachedSlug) {
-            console.log(`\x1b[32m[Cache Hit] JKAnime slug:\x1b[39m ${cachedSlug}`)
-            return jkanimeAPI.GetItemStreams(cachedSlug, streamOptions, episode)
-          }
-          return jkanimeAPI.SearchJKAnime(searchTerm).then((animeFLVitem) => {
-            const result = fuzzysort.go(searchTerm, animeFLVitem, {key: 'title', limit: 1, threshold: .5})[0]?.obj
-            if (!result?.slug) throw Error('No search results!')
-            cache.setSlugCache("jkanime", searchTerm, result.slug)
-            return jkanimeAPI.GetItemStreams(result.slug, streamOptions, episode)
-          })
-        })(), 3500, "JKAnime"
-      )
+      // 6. AnimeJara
+      const animejarap = queryProvider("animejara", enabledProviders, () => {
+        const cachedSlug = cache.getSlugCache("animejara", searchTerm)
+        if (cachedSlug) {
+          console.log(`\x1b[32m[Cache Hit] AnimeJara slug:\x1b[39m ${cachedSlug}`)
+          return animejaraAPI.GetItemStreams(cachedSlug, streamOptions, season, episode)
+        }
+        return animejaraAPI.SearchAnimeJara(searchTerm, req.params.type).then((animeItems) => {
+          if (!animeItems || animeItems.length === 0) return []
+          const result = fuzzysort.go(searchTerm, animeItems, {key: 'title', limit: 1})[0]?.obj || animeItems[0]
+          if (result?.slug) cache.setSlugCache("animejara", searchTerm, result.slug)
+          return animejaraAPI.GetItemStreams(result.slug, streamOptions, season, episode)
+        })
+      })
 
-      CombineStreams(animeFLVp, animeAV1p, henaojarap, tioanimep, animejarap, jkanimep).then((combinedStreams)=>{
+      const providerPromises = [tioanimep, jkanimep, animeFLVp, animeAV1p, henaojarap, animejarap]
+
+      CombineStreams(providerPromises).then((combinedStreams) => {
         if (combinedStreams.length > 0) {
           console.log(`\x1b[36mGot ${combinedStreams.length} streams\x1b[39m`)
           cache.setStreamCache(cacheKey, combinedStreams)
@@ -282,31 +323,27 @@ function HandleStreamRequest(req, res, next) {
     })
   }
 }
+
 /** 
  * Parses the extra config parameter we can get when the addon is configured
- * @param req - Request sent to our router, containing all relevant info
- * @param res - Our response, note we use next() just in case we need to add middleware
- * @param {subRequestMiddleware} [next] - The next middleware function in the chain
  */
 function ParseConfig(req, res, next) {
-  //console.log(`\x1b[96mEntered ParseConfig with\x1b[39m ${req.originalUrl}`)
   res.locals.config = new URLSearchParams(decodeURIComponent(req.params.config))
   console.log('Config parameters:', res.locals.config)
   next()
 }
+
 //Configured requests
 stream.get("/:config/stream/:type/:videoId/*.json", ParseConfig, HandleLongStreamRequest, HandleStreamRequest)
 stream.get("/:config/stream/:type/:videoId.json", ParseConfig, HandleStreamRequest)
 //Unconfigured requests
 stream.get("/stream/:type/:videoId/*.json", HandleLongStreamRequest, HandleStreamRequest)
 stream.get("/stream/:type/:videoId.json", HandleStreamRequest)
+
 /** 
- * Parses the capture group corresponding to URL parameters that stremio might send with its request. Tipical extra info is a dot separated title, the video hash or even file size
- * @param {string} extraParams - The string captured by express in req.params[0] in route {@link stream.get("/:type/:videoId/*.json", HandleLongSubRequest, HandleSubRequest)}
- * @return {Object} Empty if we passed undefined, populated with key/value pairs corresponding to parameters otherwise
+ * Parses query params if provided
  */
 function SearchParamsRegex(extraParams) {
-  //console.log(`\x1b[33mfull extra params were:\x1b[39m ${extraParams}`)
   if (extraParams !== undefined) {
     const paramMap = new Map()
     const keyVals = extraParams.split('&');
@@ -315,89 +352,33 @@ function SearchParamsRegex(extraParams) {
       const param = keyValArr[0]; const val = keyValArr[1];
       paramMap.set(param, val)
     }
-    const paramJSON = Object.fromEntries(paramMap)
-    //console.log(paramJSON)
-    return paramJSON
+    return Object.fromEntries(paramMap)
   } else return {}
 }
 
-function CombineStreams(animeFLVPromise, animeAV1Promise, henaojaraPromise, tioanimePromise, animejaraPromise, jkanimePromise) {
-  return Promise.allSettled([animeFLVPromise, animeAV1Promise, henaojaraPromise, tioanimePromise, animejaraPromise, jkanimePromise]).then((results) => {
+/**
+ * Combines results and ranks:
+ * 1. Debrid streams ([RD+], [AD+], [PM+], [DL+])
+ * 2. In-app direct streams (mp4, hls)
+ * 3. External browser redirects
+ */
+function CombineStreams(streamPromises) {
+  return Promise.all(streamPromises).then((results) => {
     let combinedStreams = []
-    if (results[0].value) {
-      console.log(`\x1b[36mGot ${results[0].value.length} AnimeFLV streams\x1b[39m`)
-      combinedStreams = combinedStreams.concat(results[0].value)
-    } else {console.error('\x1b[31mFailed on AnimeFLV stream search because:\x1b[39m ' + results[0].reason)}
-    if (results[1].value) {
-      console.log(`\x1b[36mGot ${results[1].value.length} AnimeAV1 streams\x1b[39m`)
-      lastInternalFLV = combinedStreams.findLastIndex((stream)=>stream.url !== undefined)
-      lastInternalAV1 = results[1].value.findLastIndex((stream)=>stream.url !== undefined)
-      if (lastInternalAV1 === -1) {
-        combinedStreams = combinedStreams.concat(results[1].value) //AnimeAV1 has only external links, just append at the end
-      } else if ((lastInternalAV1 !== -1) && (lastInternalFLV === -1)) {
-        combinedStreams = results[1].value.concat(combinedStreams) //AnimeFLV has only external links, prepend at the start
-      } else {
-        combinedStreams.splice(lastInternalFLV + 1, 0, ...results[1].value.slice(0, lastInternalAV1 + 1)) //Both have internal links, insert AnimeAV1 internal links after last AnimeFLV internal links
-        combinedStreams = combinedStreams.concat(results[1].value.slice(lastInternalAV1 + 1)) //Append external links at the end
+    for (const res of results) {
+      if (Array.isArray(res) && res.length > 0) {
+        combinedStreams = combinedStreams.concat(res)
       }
-    } else {console.error('\x1b[31mFailed on AnimeAV1 slug search because:\x1b[39m ' + results[1].reason)}
-    if (results[2].value) {
-      console.log(`\x1b[36mGot ${results[2].value.length} Henaojara streams\x1b[39m`)
-      lastInternal = combinedStreams.findLastIndex((stream)=>stream.url !== undefined)
-      lastInternalHena = results[2].value.findLastIndex((stream)=>stream.url !== undefined)
-      if (lastInternalHena === -1) {
-        combinedStreams = combinedStreams.concat(results[2].value) //Henaojara has only external links, just append at the end
-      } else if ((lastInternalHena !== -1) && (lastInternal === -1)) {
-        combinedStreams = results[2].value.concat(combinedStreams) //Previous has only external links, prepend at the start
-      } else {
-        combinedStreams.splice(lastInternal + 1, 0, ...results[2].value.slice(0, lastInternalHena + 1)) //Both have internal links, insert Henaojara internal links after last internal links
-        combinedStreams = combinedStreams.concat(results[2].value.slice(lastInternalHena + 1)) //Append external links at the end
-      }
-    } else {console.error('\x1b[31mFailed on Henaojara slug search because:\x1b[39m ' + results[2].reason)}
-    if (results[3].value) {
-      console.log(`\x1b[36mGot ${results[3].value.length} TioAnime streams\x1b[39m`)
-      lastInternal = combinedStreams.findLastIndex((stream)=>stream.url !== undefined)
-      lastInternalTio = results[3].value.findLastIndex((stream)=>stream.url !== undefined)
-      if (lastInternalTio === -1) {
-        combinedStreams = combinedStreams.concat(results[3].value) //TioAnime has only external links, just append at the end
-      } else if ((lastInternalTio !== -1) && (lastInternal === -1)) {
-        combinedStreams = results[3].value.concat(combinedStreams) //Previous has only external links, prepend at the start
-      } else {
-        combinedStreams.splice(lastInternal + 1, 0, ...results[3].value.slice(0, lastInternalTio + 1)) //Both have internal links, insert TioAnime internal links after last internal links
-        combinedStreams = combinedStreams.concat(results[3].value.slice(lastInternalTio + 1)) //Append external links at the end
-      }
-    } else {console.error('\x1b[31mFailed on TioAnime slug search because:\x1b[39m ' + results[3].reason)}
-    if (results[4].value) {
-      console.log(`\x1b[36mGot ${results[4].value.length} AnimeJara streams\x1b[39m`)
-      lastInternal = combinedStreams.findLastIndex((stream)=>stream.url !== undefined)
-      lastInternalJara = results[4].value.findLastIndex((stream)=>stream.url !== undefined)
-      if (lastInternalJara === -1) {
-        combinedStreams = combinedStreams.concat(results[4].value) //AnimeJara has only external links, just append at the end
-      } else if ((lastInternalJara !== -1) && (lastInternal === -1)) {
-        combinedStreams = results[4].value.concat(combinedStreams) //Previous has only external links, prepend at the start
-      } else {
-        combinedStreams.splice(lastInternal + 1, 0, ...results[4].value.slice(0, lastInternalJara + 1)) //Both have internal links, insert AnimeJara internal links after last internal links
-        combinedStreams = combinedStreams.concat(results[4].value.slice(lastInternalJara + 1)) //Append external links at the end
-      }
-    } else {console.error('\x1b[31mFailed on AnimeJara slug search because:\x1b[39m ' + results[4].reason)}
-    if (results[5].value) {
-      console.log(`\x1b[36mGot ${results[5].value.length} JKAnime streams\x1b[39m`)
-      lastInternal = combinedStreams.findLastIndex((stream)=>stream.url !== undefined)
-      lastInternalJK = results[5].value.findLastIndex((stream)=>stream.url !== undefined)
-      if (lastInternalJK === -1) {
-        combinedStreams = combinedStreams.concat(results[5].value) //JKAnime has only external links, just append at the end
-      } else if ((lastInternalJK !== -1) && (lastInternal === -1)) {
-        combinedStreams = results[5].value.concat(combinedStreams) //Previous has only external links, prepend at the start
-      } else {
-        combinedStreams.splice(lastInternal + 1, 0, ...results[5].value.slice(0, lastInternalJK + 1)) //Both have internal links, insert JKAnime internal links after last internal links
-      }
-    } else {
-      console.error('\x1b[31mFailed on JKAnime slug search because:\x1b[39m ' + results[5].reason);
     }
     const isDebrid = (s) => s.name && s.name.startsWith("[") && s.name.includes("+]");
+    const isInternalDirect = (s) => s.url && !isDebrid(s);
+    const isExternal = (s) => !s.url;
+
     const debridStreams = combinedStreams.filter(isDebrid);
-    const otherStreams = combinedStreams.filter((s) => !isDebrid(s));
-    return debridStreams.concat(otherStreams);
+    const internalStreams = combinedStreams.filter(isInternalDirect);
+    const externalStreams = combinedStreams.filter(isExternal);
+
+    return debridStreams.concat(internalStreams).concat(externalStreams);
   })
 }
 

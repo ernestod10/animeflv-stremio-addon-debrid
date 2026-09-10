@@ -1,0 +1,119 @@
+{
+  "attack on titan": { "tioanime": "shingeki-no-kyojin", "jkanime": "shingeki-no-kyojin", "animeflv": "shingeki-no-kyojin" },
+  "shingeki no kyojin": { "tioanime": "shingeki-no-kyojin", "jkanime": "shingeki-no-kyojin", "animeflv": "shingeki-no-kyojin" },
+  "attack on titan 2": { "tioanime": "shingeki-no-kyojin-season-2", "jkanime": "shingeki-no-kyojin-season-2", "animeflv": "shingeki-no-kyojin-season-2" },
+  "shingeki no kyojin 2": { "tioanime": "shingeki-no-kyojin-season-2", "jkanime": "shingeki-no-kyojin-season-2", "animeflv": "shingeki-no-kyojin-season-2" },
+  "attack on titan 3": { "tioanime": "shingeki-no-kyojin-season-3", "jkanime": "shingeki-no-kyojin-season-3", "animeflv": "shingeki-no-kyojin-season-3" },
+  "shingeki no kyojin 3": { "tioanime": "shingeki-no-kyojin-season-3", "jkanime": "shingeki-no-kyojin-season-3", "animeflv": "shingeki-no-kyojin-season-3" },
+  "attack on titan 4": { "tioanime": "shingeki-no-kyojin-the-final-season", "jkanime": "shingeki-no-kyojin-the-final-season", "animeflv": "shingeki-no-kyojin-the-final-season" },
+  "shingeki no kyojin 4": { "tioanime": "shingeki-no-kyojin-the-final-season", "jkanime": "shingeki-no-kyojin-the-final-season", "animeflv": "shingeki-no-kyojin-the-final-season" },
+
+  "demon slayer": { "tioanime": "kimetsu-no-yaiba", "jkanime": "kimetsu-no-yaiba", "animeflv": "kimetsu-no-yaiba" },
+  "demon slayer kimetsu no yaiba": { "tioanime": "kimetsu-no-yaiba", "jkanime": "kimetsu-no-yaiba", "animeflv": "kimetsu-no-yaiba" },
+  "kimetsu no yaiba": { "tioanime": "kimetsu-no-yaiba", "jkanime": "kimetsu-no-yaiba", "animeflv": "kimetsu-no-yaiba" },
+  "kimetsu no yaiba 2": { "tioanime": "kimetsu-no-yaiba-yuukaku-hen", "jkanime": "kimetsu-no-yaiba-yuukaku-hen", "animeflv": "kimetsu-no-yaiba-yuukaku-hen" },
+  "demon slayer 2": { "tioanime": "kimetsu-no-yaiba-yuukaku-hen", "jkanime": "kimetsu-no-yaiba-yuukaku-hen", "animeflv": "kimetsu-no-yaiba-yuukaku-hen" },
+  "kimetsu no yaiba 3": { "tioanime": "kimetsu-no-yaiba-katanakaji-no-sato-hen", "jkanime": "kimetsu-no-yaiba-katanakaji-no-sato-hen", "animeflv": "kimetsu-no-yaiba-katanakaji-no-sato-hen" },
+  "demon slayer 3": { "tioanime": "kimetsu-no-yaiba-katanakaji-no-sato-hen", "jkanime": "kimetsu-no-yaiba-katanakaji-no-sato-hen", "animeflv": "kimetsu-no-yaiba-katanakaji-no-sato-hen" },
+  "kimetsu no yaiba 4": { "tioanime": "kimetsu-no-yaiba-hashira-geiko-hen", "jkanime": "kimetsu-no-yaiba-hashira-geiko-hen", "animeflv": "kimetsu-no-yaiba-hashira-geiko-hen" },
+  "demon slayer 4": { "tioanime": "kimetsu-no-yaiba-hashira-geiko-hen", "jkanime": "kimetsu-no-yaiba-hashira-geiko-hen", "animeflv": "kimetsu-no-yaiba-hashira-geiko-hen" },
+
+  "jujutsu kaisen": { "tioanime": "jujutsu-kaisen-tv", "jkanime": "jujutsu-kaisen-tv", "animeflv": "jujutsu-kaisen-tv" },
+  "jujutsu kaisen 2": { "tioanime": "jujutsu-kaisen-2nd-season", "jkanime": "jujutsu-kaisen-2nd-season", "animeflv": "jujutsu-kaisen-2nd-season" },
+
+  "one piece": { "tioanime": "one-piece", "jkanime": "one-piece", "animeflv": "one-piece" },
+  "naruto": { "tioanime": "naruto", "jkanime": "naruto", "animeflv": "naruto" },
+  "naruto shippuden": { "tioanime": "naruto-shippuden", "jkanime": "naruto-shippuden", "animeflv": "naruto-shippuden" },
+  "boruto": { "tioanime": "boruto-naruto-next-generations", "jkanime": "boruto-naruto-next-generations", "animeflv": "boruto-naruto-next-generations" },
+  "boruto naruto next generations": { "tioanime": "boruto-naruto-next-generations", "jkanime": "boruto-naruto-next-generations", "animeflv": "boruto-naruto-next-generations" },
+
+  "bleach": { "tioanime": "bleach", "jkanime": "bleach", "animeflv": "bleach" },
+  "bleach sennen kessen-hen": { "tioanime": "bleach-sennen-kessen-hen", "jkanime": "bleach-sennen-kessen-hen", "animeflv": "bleach-sennen-kessen-hen" },
+  "bleach thousand-year blood war": { "tioanime": "bleach-sennen-kessen-hen", "jkanime": "bleach-sennen-kessen-hen", "animeflv": "bleach-sennen-kessen-hen" },
+
+  "my hero academia": { "tioanime": "boku-no-hero-academia", "jkanime": "boku-no-hero-academia", "animeflv": "boku-no-hero-academia" },
+  "boku no hero academia": { "tioanime": "boku-no-hero-academia", "jkanime": "boku-no-hero-academia", "animeflv": "boku-no-hero-academia" },
+  "my hero academia 2": { "tioanime": "boku-no-hero-academia-2nd-season", "jkanime": "boku-no-hero-academia-2nd-season", "animeflv": "boku-no-hero-academia-2nd-season" },
+  "boku no hero academia 2": { "tioanime": "boku-no-hero-academia-2nd-season", "jkanime": "boku-no-hero-academia-2nd-season", "animeflv": "boku-no-hero-academia-2nd-season" },
+  "my hero academia 3": { "tioanime": "boku-no-hero-academia-3rd-season", "jkanime": "boku-no-hero-academia-3rd-season", "animeflv": "boku-no-hero-academia-3rd-season" },
+  "boku no hero academia 3": { "tioanime": "boku-no-hero-academia-3rd-season", "jkanime": "boku-no-hero-academia-3rd-season", "animeflv": "boku-no-hero-academia-3rd-season" },
+  "my hero academia 4": { "tioanime": "boku-no-hero-academia-4th-season", "jkanime": "boku-no-hero-academia-4th-season", "animeflv": "boku-no-hero-academia-4th-season" },
+  "boku no hero academia 4": { "tioanime": "boku-no-hero-academia-4th-season", "jkanime": "boku-no-hero-academia-4th-season", "animeflv": "boku-no-hero-academia-4th-season" },
+  "my hero academia 5": { "tioanime": "boku-no-hero-academia-5th-season", "jkanime": "boku-no-hero-academia-5th-season", "animeflv": "boku-no-hero-academia-5th-season" },
+  "boku no hero academia 5": { "tioanime": "boku-no-hero-academia-5th-season", "jkanime": "boku-no-hero-academia-5th-season", "animeflv": "boku-no-hero-academia-5th-season" },
+  "my hero academia 6": { "tioanime": "boku-no-hero-academia-6th-season", "jkanime": "boku-no-hero-academia-6th-season", "animeflv": "boku-no-hero-academia-6th-season" },
+  "boku no hero academia 6": { "tioanime": "boku-no-hero-academia-6th-season", "jkanime": "boku-no-hero-academia-6th-season", "animeflv": "boku-no-hero-academia-6th-season" },
+  "my hero academia 7": { "tioanime": "boku-no-hero-academia-7th-season", "jkanime": "boku-no-hero-academia-7th-season", "animeflv": "boku-no-hero-academia-7th-season" },
+  "boku no hero academia 7": { "tioanime": "boku-no-hero-academia-7th-season", "jkanime": "boku-no-hero-academia-7th-season", "animeflv": "boku-no-hero-academia-7th-season" },
+
+  "solo leveling": { "tioanime": "ore-dake-level-up-na-ken", "jkanime": "ore-dake-level-up-na-ken", "animeflv": "ore-dake-level-up-na-ken" },
+  "ore dake level up na ken": { "tioanime": "ore-dake-level-up-na-ken", "jkanime": "ore-dake-level-up-na-ken", "animeflv": "ore-dake-level-up-na-ken" },
+  "solo leveling 2": { "tioanime": "ore-dake-level-up-na-ken-season-2-arise-from-the-shadow", "jkanime": "ore-dake-level-up-na-ken-season-2-arise-from-the-shadow", "animeflv": "ore-dake-level-up-na-ken-season-2-arise-from-the-shadow" },
+
+  "chainsaw man": { "tioanime": "chainsaw-man", "jkanime": "chainsaw-man", "animeflv": "chainsaw-man" },
+  "death note": { "tioanime": "death-note", "jkanime": "death-note", "animeflv": "death-note" },
+  "hunter x hunter": { "tioanime": "hunter-x-hunter-2011", "jkanime": "hunter-x-hunter-2011", "animeflv": "hunter-x-hunter-2011" },
+  "hunter x hunter 2011": { "tioanime": "hunter-x-hunter-2011", "jkanime": "hunter-x-hunter-2011", "animeflv": "hunter-x-hunter-2011" },
+
+  "fullmetal alchemist brotherhood": { "tioanime": "fullmetal-alchemist-brotherhood", "jkanime": "fullmetal-alchemist-brotherhood", "animeflv": "fullmetal-alchemist-brotherhood" },
+  "fullmetal alchemist": { "tioanime": "fullmetal-alchemist", "jkanime": "fullmetal-alchemist", "animeflv": "fullmetal-alchemist" },
+
+  "frieren": { "tioanime": "sousou-no-frieren", "jkanime": "sousou-no-frieren", "animeflv": "sousou-no-frieren" },
+  "sousou no frieren": { "tioanime": "sousou-no-frieren", "jkanime": "sousou-no-frieren", "animeflv": "sousou-no-frieren" },
+  "frieren beyond journey's end": { "tioanime": "sousou-no-frieren", "jkanime": "sousou-no-frieren", "animeflv": "sousou-no-frieren" },
+
+  "spy x family": { "tioanime": "spy-x-family", "jkanime": "spy-x-family", "animeflv": "spy-x-family" },
+  "spy x family 2": { "tioanime": "spy-x-family-season-2", "jkanime": "spy-x-family-season-2", "animeflv": "spy-x-family-season-2" },
+
+  "dragon ball z": { "tioanime": "dragon-ball-z", "jkanime": "dragon-ball-z", "animeflv": "dragon-ball-z" },
+  "dragon ball super": { "tioanime": "dragon-ball-super", "jkanime": "dragon-ball-super", "animeflv": "dragon-ball-super" },
+  "dragon ball daima": { "tioanime": "dragon-ball-daima", "jkanime": "dragon-ball-daima", "animeflv": "dragon-ball-daima" },
+  "dragon ball": { "tioanime": "dragon-ball", "jkanime": "dragon-ball", "animeflv": "dragon-ball" },
+
+  "tokyo ghoul": { "tioanime": "tokyo-ghoul", "jkanime": "tokyo-ghoul", "animeflv": "tokyo-ghoul" },
+  "tokyo revengers": { "tioanime": "tokyo-revengers", "jkanime": "tokyo-revengers", "animeflv": "tokyo-revengers" },
+  "tokyo revengers 2": { "tioanime": "tokyo-revengers-seiya-kessen-hen", "jkanime": "tokyo-revengers-seiya-kessen-hen", "animeflv": "tokyo-revengers-seiya-kessen-hen" },
+
+  "vinland saga": { "tioanime": "vinland-saga", "jkanime": "vinland-saga", "animeflv": "vinland-saga" },
+  "vinland saga 2": { "tioanime": "vinland-saga-season-2", "jkanime": "vinland-saga-season-2", "animeflv": "vinland-saga-season-2" },
+
+  "one punch man": { "tioanime": "one-punch-man", "jkanime": "one-punch-man", "animeflv": "one-punch-man" },
+  "one punch man 2": { "tioanime": "one-punch-man-2nd-season", "jkanime": "one-punch-man-2nd-season", "animeflv": "one-punch-man-2nd-season" },
+
+  "cyberpunk edgerunners": { "tioanime": "cyberpunk-edgerunners", "jkanime": "cyberpunk-edgerunners", "animeflv": "cyberpunk-edgerunners" },
+  "danmachi": { "tioanime": "dungeon-ni-deai-wo-motomeru-no-wa-machigatteiru-darou-ka", "jkanime": "dungeon-ni-deai-wo-motomeru-no-wa-machigatteiru-darou-ka", "animeflv": "dungeon-ni-deai-wo-motomeru-no-wa-machigatteiru-darou-ka" },
+  "black clover": { "tioanime": "black-clover-tv", "jkanime": "black-clover-tv", "animeflv": "black-clover-tv" },
+  "dr stone": { "tioanime": "dr-stone", "jkanime": "dr-stone", "animeflv": "dr-stone" },
+  "dr stone 2": { "tioanime": "dr-stone-stone-wars", "jkanime": "dr-stone-stone-wars", "animeflv": "dr-stone-stone-wars" },
+  "dr stone 3": { "tioanime": "dr-stone-new-world", "jkanime": "dr-stone-new-world", "animeflv": "dr-stone-new-world" },
+
+  "mushoku tensei": { "tioanime": "mushoku-tensei-isekai-ittara-honki-dasu", "jkanime": "mushoku-tensei-isekai-ittara-honki-dasu", "animeflv": "mushoku-tensei-isekai-ittara-honki-dasu" },
+  "mushoku tensei jobless reincarnation": { "tioanime": "mushoku-tensei-isekai-ittara-honki-dasu", "jkanime": "mushoku-tensei-isekai-ittara-honki-dasu", "animeflv": "mushoku-tensei-isekai-ittara-honki-dasu" },
+  "mushoku tensei 2": { "tioanime": "mushoku-tensei-ii-isekai-ittara-honki-dasu", "jkanime": "mushoku-tensei-ii-isekai-ittara-honki-dasu", "animeflv": "mushoku-tensei-ii-isekai-ittara-honki-dasu" },
+
+  "re zero": { "tioanime": "re-zero-kara-hajimeru-isekai-seikatsu", "jkanime": "re-zero-kara-hajimeru-isekai-seikatsu", "animeflv": "re-zero-kara-hajimeru-isekai-seikatsu" },
+  "re zero 2": { "tioanime": "rezero-kara-hajimeru-isekai-seikatsu-2nd-season", "jkanime": "rezero-kara-hajimeru-isekai-seikatsu-2nd-season", "animeflv": "rezero-kara-hajimeru-isekai-seikatsu-2nd-season" },
+  "re zero 3": { "tioanime": "rezero-kara-hajimeru-isekai-seikatsu-3rd-season", "jkanime": "rezero-kara-hajimeru-isekai-seikatsu-3rd-season", "animeflv": "rezero-kara-hajimeru-isekai-seikatsu-3rd-season" },
+
+  "sword art online": { "tioanime": "sword-art-online", "jkanime": "sword-art-online", "animeflv": "sword-art-online" },
+  "sword art online 2": { "tioanime": "sword-art-online-ii", "jkanime": "sword-art-online-ii", "animeflv": "sword-art-online-ii" },
+  "sword art online alicization": { "tioanime": "sword-art-online-alicization", "jkanime": "sword-art-online-alicization", "animeflv": "sword-art-online-alicization" },
+
+  "overlord": { "tioanime": "overlord", "jkanime": "overlord", "animeflv": "overlord" },
+  "overlord 2": { "tioanime": "overlord-ii", "jkanime": "overlord-ii", "animeflv": "overlord-ii" },
+  "overlord 3": { "tioanime": "overlord-iii", "jkanime": "overlord-iii", "animeflv": "overlord-iii" },
+  "overlord 4": { "tioanime": "overlord-iv", "jkanime": "overlord-iv", "animeflv": "overlord-iv" },
+
+  "kaiju no 8": { "tioanime": "kaijuu-8-gou", "jkanime": "kaijuu-8-gou", "animeflv": "kaijuu-8-gou" },
+  "kaijuu 8-gou": { "tioanime": "kaijuu-8-gou", "jkanime": "kaijuu-8-gou", "animeflv": "kaijuu-8-gou" },
+  "dandadan": { "tioanime": "dandadan", "jkanime": "dandadan", "animeflv": "dandadan" },
+  "blue lock": { "tioanime": "blue-lock", "jkanime": "blue-lock", "animeflv": "blue-lock" },
+  "blue lock 2": { "tioanime": "blue-lock-vs-u-20-japan", "jkanime": "blue-lock-vs-u-20-japan", "animeflv": "blue-lock-vs-u-20-japan" },
+  "oshi no ko": { "tioanime": "oshi-no-ko", "jkanime": "oshi-no-ko", "animeflv": "oshi-no-ko" },
+  "oshi no ko 2": { "tioanime": "oshi-no-ko-2nd-season", "jkanime": "oshi-no-ko-2nd-season", "animeflv": "oshi-no-ko-2nd-season" },
+
+  "steins gate": { "tioanime": "steinsgate", "jkanime": "steinsgate", "animeflv": "steinsgate" },
+  "code geass": { "tioanime": "code-geass-hangyaku-no-lelouch", "jkanime": "code-geass-hangyaku-no-lelouch", "animeflv": "code-geass-hangyaku-no-lelouch" },
+  "evangelion": { "tioanime": "neon-genesis-evangelion", "jkanime": "neon-genesis-evangelion", "animeflv": "neon-genesis-evangelion" },
+  "neon genesis evangelion": { "tioanime": "neon-genesis-evangelion", "jkanime": "neon-genesis-evangelion", "animeflv": "neon-genesis-evangelion" }
+}

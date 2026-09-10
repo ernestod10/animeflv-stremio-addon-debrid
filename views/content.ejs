@@ -2,17 +2,50 @@
   <div class="separator"></div>
   <div style="display:flex;flex-direction:column">
     <label class="label-to-top" style="display:block">Return external streams (they open in a browser) <input type="checkbox" id="externalStreams"<%= (config?.get("externalStreams"))?` checked="true"`:"" %>></label>
-    <label class="label-to-top">Select catalogs that will appear on the Stremio homepage (airing anime for each provider):
-    <div style="display:flex;gap:1em;padding-block-start:1em;flex-wrap:wrap;justify-content:space-evenly">
-      <label style="display:block"><img style="height:1.8cap" src="https://www4.animeflv.net/assets/animeflv/img/logo.png?v=2.3" alt="AnimeFLV"><input style="vertical-align:top" type="checkbox" id="animeflv"<%= (config?.get("onAirCatalogs")?.includes("animeflv"))?` checked="true"`:"" %>></label>
-      <label style="display:block"><img style="height:1.2em" src="https://animeav1.com/img/logo-dark.svg" alt="AnimeAV1"> <input style="vertical-align:top" type="checkbox" id="animeav1"<%= (config?.get("onAirCatalogs")?.includes("animeav1"))?` checked="true"`:"" %>></label>
-      <label style="display:block"><img style="height:1.2em" src="https://i.imgur.com/cE0mosE.png" alt="Henaojara"> <input style="vertical-align:top" type="checkbox" id="henaojara"<%= (config?.get("onAirCatalogs")?.includes("henaojara"))?` checked="true"`:"" %>></label>
-      <label style="display:block"><img style="height:1.4em" src="https://tioanime.com/assets/img/logo-dark.png" alt="TioAnime"> <input style="vertical-align:top" type="checkbox" id="tioanime"<%= (config?.get("onAirCatalogs")?.includes("tioanime"))?` checked="true"`:"" %>></label>
-      <label style="display:block"><img style="height:1.3em;margin-inline-start:-.6em" src="https://animejara.com/wp-content/uploads/2025/11/ANIMEJARA_INICIO3.png" alt="AnimeJara"> <input style="vertical-align:top" type="checkbox" id="animejara"<%= (config?.get("onAirCatalogs")?.includes("animejara"))?` checked="true"`:"" %>></label>
-      <label style="display:block"><img style="height:1.1em" src="https://cdn.jkdesa.com/assets3/css/img/jkanimenet-dark.png?v=2.0.184" alt="JKAnime"> <input style="vertical-align:top" type="checkbox" id="jkanime"<%= (config?.get("onAirCatalogs")?.includes("jkanime"))?` checked="true"`:"" %>></label>
+
+    <div style="margin-top:1em;margin-bottom:1.2em;padding:1.2em;border:1px solid rgba(255,255,255,0.18);border-radius:10px;background:rgba(0,0,0,0.3);">
+      <label class="label-to-top" style="font-weight:bold;font-size:1.05em;display:flex;align-items:center;gap:0.5em;">
+        🔍 Proveedores de Búsqueda de Streams
+      </label>
+      <div style="font-size:0.85em;color:#aaa;margin-top:0.4em;margin-bottom:0.8em;">
+        Selecciona las webs a consultar para obtener enlaces. Desmarcar proveedores lentos o caídos acelera la búsqueda a menos de 1 segundo.
+      </div>
+      <div style="display:flex;gap:0.6em;margin-bottom:0.8em;">
+        <button type="button" id="btnPresetFast" style="font-size:0.8em;padding:0.3em 0.8em;cursor:pointer;background:#007acc;color:#fff;border:none;border-radius:4px;">⚡ Recomendado (Rápido: TioAnime + JKAnime)</button>
+        <button type="button" id="btnPresetAll" style="font-size:0.8em;padding:0.3em 0.8em;cursor:pointer;background:#444;color:#fff;border:none;border-radius:4px;">Todos</button>
+      </div>
+      <%
+        const curStreamProv = config?.get("streamProviders") ? config.get("streamProviders").split(',') : ['tioanime', 'jkanime'];
+      %>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:0.8em;padding-top:0.5em;">
+        <label style="display:flex;align-items:center;gap:0.5em;font-size:0.9em;">
+          <input type="checkbox" id="sp_tioanime" value="tioanime"<%= curStreamProv.includes('tioanime') ? ' checked="true"' : '' %>>
+          <b>TioAnime</b> <span style="color:#00ff88;font-size:0.8em;">⚡</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:0.5em;font-size:0.9em;">
+          <input type="checkbox" id="sp_jkanime" value="jkanime"<%= curStreamProv.includes('jkanime') ? ' checked="true"' : '' %>>
+          <b>JKAnime</b> <span style="color:#00ff88;font-size:0.8em;">⚡</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:0.5em;font-size:0.9em;">
+          <input type="checkbox" id="sp_animeflv" value="animeflv"<%= curStreamProv.includes('animeflv') ? ' checked="true"' : '' %>>
+          AnimeFLV
+        </label>
+        <label style="display:flex;align-items:center;gap:0.5em;font-size:0.9em;">
+          <input type="checkbox" id="sp_animeav1" value="animeav1"<%= curStreamProv.includes('animeav1') ? ' checked="true"' : '' %>>
+          AnimeAV1
+        </label>
+        <label style="display:flex;align-items:center;gap:0.5em;font-size:0.9em;">
+          <input type="checkbox" id="sp_henaojara" value="henaojara"<%= curStreamProv.includes('henaojara') ? ' checked="true"' : '' %>>
+          Henaojara
+        </label>
+        <label style="display:flex;align-items:center;gap:0.5em;font-size:0.9em;">
+          <input type="checkbox" id="sp_animejara" value="animejara"<%= curStreamProv.includes('animejara') ? ' checked="true"' : '' %>>
+          AnimeJara
+        </label>
+      </div>
     </div>
-    </label>
-    <div style="margin-top:1.2em;margin-bottom:1.2em;padding:1.2em;border:1px solid rgba(255,255,255,0.18);border-radius:10px;background:rgba(0,0,0,0.3);">
+
+    <div style="margin-top:0.2em;margin-bottom:1.2em;padding:1.2em;border:1px solid rgba(255,255,255,0.18);border-radius:10px;background:rgba(0,0,0,0.3);">
       <label class="label-to-top" style="font-weight:bold;font-size:1.1em;display:flex;align-items:center;gap:0.5em;">
         ⚡ Integración Multi-Debrid
       </label>
@@ -34,11 +67,21 @@
       </label>
     </div>
 
+    <label class="label-to-top">Select catalogs that will appear on the Stremio homepage (airing anime for each provider):
+    <div style="display:flex;gap:1em;padding-block-start:1em;flex-wrap:wrap;justify-content:space-evenly">
+      <label style="display:block"><img style="height:1.8cap" src="https://www4.animeflv.net/assets/animeflv/img/logo.png?v=2.3" alt="AnimeFLV"><input style="vertical-align:top" type="checkbox" id="animeflv"<%= (config?.get("onAirCatalogs")?.includes("animeflv"))?` checked="true"`:"" %>></label>
+      <label style="display:block"><img style="height:1.2em" src="https://animeav1.com/img/logo-dark.svg" alt="AnimeAV1"> <input style="vertical-align:top" type="checkbox" id="animeav1"<%= (config?.get("onAirCatalogs")?.includes("animeav1"))?` checked="true"`:"" %>></label>
+      <label style="display:block"><img style="height:1.2em" src="https://i.imgur.com/cE0mosE.png" alt="Henaojara"> <input style="vertical-align:top" type="checkbox" id="henaojara"<%= (config?.get("onAirCatalogs")?.includes("henaojara"))?` checked="true"`:"" %>></label>
+      <label style="display:block"><img style="height:1.4em" src="https://tioanime.com/assets/img/logo-dark.png" alt="TioAnime"> <input style="vertical-align:top" type="checkbox" id="tioanime"<%= (config?.get("onAirCatalogs")?.includes("tioanime"))?` checked="true"`:"" %>></label>
+      <label style="display:block"><img style="height:1.3em;margin-inline-start:-.6em" src="https://animejara.com/wp-content/uploads/2025/11/ANIMEJARA_INICIO3.png" alt="AnimeJara"> <input style="vertical-align:top" type="checkbox" id="animejara"<%= (config?.get("onAirCatalogs")?.includes("animejara"))?` checked="true"`:"" %>></label>
+      <label style="display:block"><img style="height:1.1em" src="https://cdn.jkdesa.com/assets3/css/img/jkanimenet-dark.png?v=2.0.184" alt="JKAnime"> <input style="vertical-align:top" type="checkbox" id="jkanime"<%= (config?.get("onAirCatalogs")?.includes("jkanime"))?` checked="true"`:"" %>></label>
+    </div>
+    </label>
+
     <label class="full-width label-to-top" style="display:block" for="manifest_url">Your manifest URL:</label>
     <textarea class="form-element" id="manifest_url" rows="1"
       style="resize:none;overflow:hidden;text-align:center;font-size:unset;"
       readonly>https://pigamer37.alwaysdata.net/manifest.json</textarea>
-      <!-- 'stremio://' + window.location.host + '/' + encodeURIComponent(JSON.stringify(config)) + '/manifest.json' -->
   </div>
   <button class="full-width" onclick="{navigator.clipboard.writeText(getElementById('manifest_url').value).then((e)=>{
           console.log('copied!');const origText=event.target.innerText;event.target.innerText='Copied!';setTimeout(function(){
@@ -49,11 +92,45 @@
   <a id="installLink" class="install-link" href="#">
     <button tabindex="-1" class="full-width">Open In Stremio</button>
   </a>
-  <script>const ta=document.getElementById('manifest_url');const externalStreams=document.getElementById('externalStreams')
-    const animeflv=document.getElementById('animeflv');const animeav1=document.getElementById('animeav1');const henaojara=document.getElementById('henaojara');const tioanime=document.getElementById('tioanime');const animejara=document.getElementById('animejara');const jkanime=document.getElementById('jkanime');
-    const debridProvider=document.getElementById('debridProvider');const debridKey=document.getElementById('debridKey');const debridOnly=document.getElementById('debridOnly');const debridLink=document.getElementById('debridLink');
-    const providers=[animeflv,animeav1,henaojara,tioanime,animejara,jkanime]
-    const installLink=document.getElementById('installLink')
+  <script>
+    const ta=document.getElementById('manifest_url');
+    const externalStreams=document.getElementById('externalStreams');
+    const animeflv=document.getElementById('animeflv');
+    const animeav1=document.getElementById('animeav1');
+    const henaojara=document.getElementById('henaojara');
+    const tioanime=document.getElementById('tioanime');
+    const animejara=document.getElementById('animejara');
+    const jkanime=document.getElementById('jkanime');
+    const onAirProviders=[animeflv,animeav1,henaojara,tioanime,animejara,jkanime];
+
+    const sp_tioanime=document.getElementById('sp_tioanime');
+    const sp_jkanime=document.getElementById('sp_jkanime');
+    const sp_animeflv=document.getElementById('sp_animeflv');
+    const sp_animeav1=document.getElementById('sp_animeav1');
+    const sp_henaojara=document.getElementById('sp_henaojara');
+    const sp_animejara=document.getElementById('sp_animejara');
+    const streamProviderCheckboxes=[sp_tioanime,sp_jkanime,sp_animeflv,sp_animeav1,sp_henaojara,sp_animejara];
+
+    const btnPresetFast=document.getElementById('btnPresetFast');
+    const btnPresetAll=document.getElementById('btnPresetAll');
+
+    btnPresetFast.addEventListener('click', () => {
+      streamProviderCheckboxes.forEach(cb => {
+        cb.checked = (cb.value === 'tioanime' || cb.value === 'jkanime');
+      });
+      genManifLink();
+    });
+
+    btnPresetAll.addEventListener('click', () => {
+      streamProviderCheckboxes.forEach(cb => { cb.checked = true; });
+      genManifLink();
+    });
+
+    const debridProvider=document.getElementById('debridProvider');
+    const debridKey=document.getElementById('debridKey');
+    const debridOnly=document.getElementById('debridOnly');
+    const debridLink=document.getElementById('debridLink');
+    const installLink=document.getElementById('installLink');
 
     const providerUrls = {
       rd: { url: "https://real-debrid.com/apitoken", label: "real-debrid.com/apitoken" },
@@ -72,8 +149,14 @@
 
     function genManifLink(){
       let config=new URLSearchParams();
-      if(providers.some((e)=>e.checked)){config.append("onAirCatalogs",providers.filter(e=>e.checked).map(e=>e.id).join())}
+      if(onAirProviders.some((e)=>e.checked)){config.append("onAirCatalogs",onAirProviders.filter(e=>e.checked).map(e=>e.id).join())}
       if(externalStreams.checked){config.append("externalStreams","true")}
+
+      const activeStreamProvs = streamProviderCheckboxes.filter(cb => cb.checked).map(cb => cb.value);
+      if(activeStreamProvs.length > 0 && activeStreamProvs.length < streamProviderCheckboxes.length){
+        config.append("streamProviders", activeStreamProvs.join(','));
+      }
+
       if(debridKey.value.trim()){
         config.append("debridProvider", debridProvider.value);
         config.append("debridKey", debridKey.value.trim());
@@ -83,6 +166,8 @@
       installLink.href=ta.value.replace('https://','stremio://').replace('http://','stremio://')
       ta.style.minHeight=ta.scrollHeight+"px"
     }
-    [externalStreams,...providers,debridKey,debridOnly].forEach((e)=>e.addEventListener('input',()=>genManifLink()))
-    genManifLink()</script>
+
+    [externalStreams,...onAirProviders,...streamProviderCheckboxes,debridKey,debridOnly].forEach((e)=>e.addEventListener('input',()=>genManifLink()))
+    genManifLink();
+  </script>
 </div>
