@@ -58,7 +58,7 @@ function HandleLongStreamRequest(req, res, next) {
 /** 
  * Handles requests to /stream whether they contain extra parameters or just the type and videoID.
  */
-function HandleStreamRequest(req, res, next) {
+async function HandleStreamRequest(req, res, next) {
   console.log(`\x1b[96mEntered HandleStreamRequest with\x1b[39m ${req.originalUrl}`)
   const onlyInternal = (res.locals.config?.get("externalStreams") != 'true')
   const debridProvider = res.locals.config?.get("debridProvider") || "rd"
@@ -81,9 +81,9 @@ function HandleStreamRequest(req, res, next) {
     baseUrl
   }
 
-  // 1. Check Stream Cache
+  // 1. Check Stream Cache (RAM + Redis)
   const cacheKey = `${req.params.type}:${req.params.videoId}:${debridProvider}:${debridKey || 'nodebrid'}:${onlyInternal}:${debridOnly}:${enabledProviders.sort().join(',')}`
-  const cachedStreams = cache.getStreamCache(cacheKey)
+  const cachedStreams = await cache.getStreamCache(cacheKey)
   if (cachedStreams && cachedStreams.length > 0) {
     console.log(`\x1b[32m[Cache Hit] Returning ${cachedStreams.length} cached streams for ${req.params.videoId}\x1b[39m`)
     res.header('Cache-Control', "max-age=86400, stale-while-revalidate=86400, stale-if-error=259200")
@@ -205,8 +205,8 @@ function HandleStreamRequest(req, res, next) {
       const searchTerm = ((season) && (parseInt(season) !== 1) && (parseInt(season) !== 0)) ? `${metadata.title} ${season}` : metadata.title
       
       // 1. TioAnime
-      const tioanimep = queryProvider("tioanime", enabledProviders, () => {
-        const cachedSlug = cache.getSlugCache("tioanime", searchTerm)
+      const tioanimep = queryProvider("tioanime", enabledProviders, async () => {
+        const cachedSlug = await cache.getSlugCache("tioanime", searchTerm)
         if (cachedSlug) {
           console.log(`\x1b[32m[Cache Hit] TioAnime slug:\x1b[39m ${cachedSlug}`)
           return tioanimeAPI.GetItemStreams(cachedSlug, streamOptions, episode)
@@ -220,8 +220,8 @@ function HandleStreamRequest(req, res, next) {
       })
 
       // 2. JKAnime
-      const jkanimep = queryProvider("jkanime", enabledProviders, () => {
-        const cachedSlug = cache.getSlugCache("jkanime", searchTerm)
+      const jkanimep = queryProvider("jkanime", enabledProviders, async () => {
+        const cachedSlug = await cache.getSlugCache("jkanime", searchTerm)
         if (cachedSlug) {
           console.log(`\x1b[32m[Cache Hit] JKAnime slug:\x1b[39m ${cachedSlug}`)
           return jkanimeAPI.GetItemStreams(cachedSlug, streamOptions, episode)
@@ -236,8 +236,8 @@ function HandleStreamRequest(req, res, next) {
       })
 
       // 3. AnimeFLV
-      const animeFLVp = queryProvider("animeflv", enabledProviders, () => {
-        const cachedSlug = cache.getSlugCache("animeflv", searchTerm)
+      const animeFLVp = queryProvider("animeflv", enabledProviders, async () => {
+        const cachedSlug = await cache.getSlugCache("animeflv", searchTerm)
         if (cachedSlug) {
           console.log(`\x1b[32m[Cache Hit] AnimeFLV slug:\x1b[39m ${cachedSlug}`)
           return animeFLVAPI.GetItemStreams(cachedSlug, streamOptions, episode)
@@ -251,8 +251,8 @@ function HandleStreamRequest(req, res, next) {
       })
 
       // 4. AnimeAV1
-      const animeAV1p = queryProvider("animeav1", enabledProviders, () => {
-        const cachedSlug = cache.getSlugCache("animeav1", searchTerm)
+      const animeAV1p = queryProvider("animeav1", enabledProviders, async () => {
+        const cachedSlug = await cache.getSlugCache("animeav1", searchTerm)
         if (cachedSlug) {
           console.log(`\x1b[32m[Cache Hit] AnimeAV1 slug:\x1b[39m ${cachedSlug}`)
           return animeAV1API.GetItemStreams(cachedSlug, streamOptions, episode)
@@ -267,8 +267,8 @@ function HandleStreamRequest(req, res, next) {
       })
 
       // 5. Henaojara
-      const henaojarap = queryProvider("henaojara", enabledProviders, () => {
-        const cachedSlug = cache.getSlugCache("henaojara", searchTerm)
+      const henaojarap = queryProvider("henaojara", enabledProviders, async () => {
+        const cachedSlug = await cache.getSlugCache("henaojara", searchTerm)
         if (cachedSlug) {
           console.log(`\x1b[32m[Cache Hit] Henaojara slug:\x1b[39m ${cachedSlug}`)
           return henaojaraAPI.GetItemStreams(cachedSlug, streamOptions, episode)
@@ -282,8 +282,8 @@ function HandleStreamRequest(req, res, next) {
       })
 
       // 6. AnimeJara
-      const animejarap = queryProvider("animejara", enabledProviders, () => {
-        const cachedSlug = cache.getSlugCache("animejara", searchTerm)
+      const animejarap = queryProvider("animejara", enabledProviders, async () => {
+        const cachedSlug = await cache.getSlugCache("animejara", searchTerm)
         if (cachedSlug) {
           console.log(`\x1b[32m[Cache Hit] AnimeJara slug:\x1b[39m ${cachedSlug}`)
           return animejaraAPI.GetItemStreams(cachedSlug, streamOptions, season, episode)
